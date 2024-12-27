@@ -147,22 +147,6 @@ if submitted:
     st.markdown("### 🎯 Prediction Result")
     st.subheader(result)
 
-    st.markdown("### 📊 Income vs Loan Amount by Loan Status")
-    fig = px.scatter(
-        df,
-        x='income_annum',
-        y='loan_amount',
-        color='loan_status',
-        title='Income vs Loan Amount by Loan Status',
-        labels={'income_annum': 'Income', 'loan_amount': 'Loan Amount', 'loan_status': 'Loan Status'},
-        color_discrete_map={0: 'red', 1: 'green'},
-        hover_data=["loan_term", "cibil_score"],
-        category_orders={"loan_status": [1, 0]}
-    )
-
-    fig.update_traces(marker=dict(size=10, opacity=0.8))
-    st.plotly_chart(fig)
-
     
     st.markdown("""
     **Key Notes:**  
