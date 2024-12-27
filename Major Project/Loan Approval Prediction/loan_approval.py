@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import plotly.express as px
 
 
 st.set_page_config(page_title="Loan Approval Prediction", page_icon=":moneybag:", layout="centered")
@@ -12,6 +13,42 @@ st.markdown("""
     Fill out the form below to check the likelihood of loan approval.  
     📝 *Make sure to provide accurate information.*
 """)
+
+@st.cache_data
+def load_data():
+    df = pd.read_csv('loan_approval_dataset.csv')
+    df[' education'].replace([' Graduate', ' Not Graduate'], [1, 0], inplace=True)
+    df[' self_employed'].replace([' No', ' Yes'], [0, 1], inplace=True)
+    df[' loan_status'].replace([' Approved', ' Rejected'], [1, 0], inplace=True)
+    return df
+
+df = load_data()
+
+#Sidebar Charts
+st.sidebar.markdown("### 📊 Dataset Insights")
+loan_status_counts = df[' loan_status'].value_counts()
+loan_status_labels = ['Approved', 'Not Approved']
+
+pie_chart_data = pd.DataFrame({
+    'Loan Status': loan_status_labels,
+    'Count': loan_status_counts.values
+})
+fig = px.pie(
+    pie_chart_data,
+    values='Count',
+    names='Loan Status',
+    title='Loan Status Distribution',
+    hover_data=['Count'],
+    labels={'Loan Status': 'Loan Status', 'Count': 'Count'},
+    color_discrete_sequence=['#4CAF50', '#FF5252']
+)
+
+fig.update_traces(
+    textinfo='percent+label',
+    hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}"
+)
+
+st.sidebar.plotly_chart(fig)
 
 #Collect user Input
 st.markdown("### 📋 Applicant Details")
@@ -53,15 +90,6 @@ def user_input_features():
 
 @st.cache_resource
 def train_model():
-   #Sample dataset and preprocessing
-    df = pd.read_csv('loan_approval_dataset.csv')
-
-    #Data Preprocessing
-    df[' education'].replace([' Graduate', ' Not Graduate'], [1, 0], inplace=True)
-    df[' self_employed'].replace([' Yes', ' No'], [1, 0], inplace=True)
-    df[' loan_status'].replace([' Approved', ' Rejected'], [1, 0], inplace=True)
-    df = df.drop(['loan_id'], axis=1)
-
     x = df[[
         ' no_of_dependents',
         ' education',
@@ -95,6 +123,22 @@ if submitted:
     st.markdown("### 🎯 Prediction Result")
     st.subheader(result)
 
+    st.markdown("### 📊 Income vs Loan Amount by Loan Status")
+    fig = px.scatter(
+        df,
+        x=' income_annum',
+        y=' loan_amount',
+        color=' loan_status',
+        title='Income vs Loan Amount by Loan Status',
+        labels={'income_annum': 'Income', 'loan_amount': 'Loan Amount', 'loan_status': 'Loan Status'},
+        color_discrete_map={0: 'red', 1: 'green'},
+        hover_data=[" loan_term", " cibil_score"],
+        category_orders={" loan_status": [1, 0]}
+    )
+
+    fig.update_traces(marker=dict(size=10, opacity=0.8))
+
+    
     st.markdown("""
     **Key Notes:**  
     - Loan approval depends on several factors, including CIBIL score, income, and loan amount.  
