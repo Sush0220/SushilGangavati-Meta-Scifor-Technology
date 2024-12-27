@@ -15,18 +15,42 @@ st.markdown("""
 """)
 
 @st.cache_data
-def load_data():
-    df = pd.read_csv('Loan_Approval_Prediction/loan_approval_dataset.csv')
-    df[' education'].replace([' Graduate', ' Not Graduate'], [1, 0], inplace=True)
-    df[' self_employed'].replace([' No', ' Yes'], [0, 1], inplace=True)
-    df[' loan_status'].replace([' Approved', ' Rejected'], [1, 0], inplace=True)
+def generate_dataset():
+    np.random.seed(42)
+
+    # Generating synthetic data
+    data = {
+        'no_of_dependents': np.random.randint(0, 5, 1000),
+        'education': np.random.choice(['Graduate', 'Not Graduate'], 1000),
+        'self_employed': np.random.choice(['Yes', 'No'], 1000),
+        'income_annum': np.random.randint(100000, 1000000, 1000),
+        'loan_amount': np.random.randint(50000, 1000000, 1000),
+        'loan_term': np.random.choice([12, 24, 36, 48, 60], 1000),
+        'cibil_score': np.random.randint(300, 900, 1000),
+        'residential_assets_value': np.random.randint(100000, 5000000, 1000),
+        'commercial_assets_value': np.random.randint(100000, 5000000, 1000),
+        'luxury_assets_value': np.random.randint(50000, 2000000, 1000),
+        'bank_assets_value': np.random.randint(100000, 5000000, 1000),
+        'loan_status': np.random.choice([0, 1], 1000)
+    }
+
+    # Create DataFrame
+    df = pd.DataFrame(data)
+
+    # Generate synthetic target variable (loan_status)
+    df['loan_status'] = np.random.choice([0, 1], size=1000, p=[0.3, 0.7])  # 70% approved, 30% rejected
+
+    # Encode categorical variables
+    df['education'].replace(['Graduate', 'Not Graduate'], [1, 0], inplace=True)
+    df['self_employed'].replace(['No', 'Yes'], [0, 1], inplace=True)
+
     return df
 
-df = load_data()
+df = generate_dataset()
 
 #Sidebar Charts
 st.sidebar.markdown("### 📊 Dataset Insights")
-loan_status_counts = df[' loan_status'].value_counts()
+loan_status_counts = df['loan_status'].value_counts()
 loan_status_labels = ['Approved', 'Not Approved']
 
 pie_chart_data = pd.DataFrame({
@@ -91,20 +115,20 @@ def user_input_features():
 @st.cache_resource
 def train_model():
     x = df[[
-        ' no_of_dependents',
-        ' education',
-        ' self_employed',
-        ' income_annum',
-        ' loan_amount', 
-        ' loan_term',
-        ' cibil_score',
-        ' residential_assets_value',
-        ' commercial_assets_value',
-        ' luxury_assets_value',
-        ' bank_asset_value'
+        'no_of_dependents',
+        'education',
+        'self_employed',
+        'income_annum',
+        'loan_amount', 
+        'loan_term',
+        'cibil_score',
+        'residential_assets_value',
+        'commercial_assets_value',
+        'luxury_assets_value',
+        'bank_assets_value'
     ]]
 
-    y = df[' loan_status']
+    y = df['loan_status']
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=12)
 
@@ -126,14 +150,14 @@ if submitted:
     st.markdown("### 📊 Income vs Loan Amount by Loan Status")
     fig = px.scatter(
         df,
-        x=' income_annum',
-        y=' loan_amount',
-        color=' loan_status',
+        x='income_annum',
+        y='loan_amount',
+        color='loan_status',
         title='Income vs Loan Amount by Loan Status',
         labels={'income_annum': 'Income', 'loan_amount': 'Loan Amount', 'loan_status': 'Loan Status'},
         color_discrete_map={0: 'red', 1: 'green'},
-        hover_data=[" loan_term", " cibil_score"],
-        category_orders={" loan_status": [1, 0]}
+        hover_data=["loan_term", "cibil_score"],
+        category_orders={"loan_status": [1, 0]}
     )
 
     fig.update_traces(marker=dict(size=10, opacity=0.8))
