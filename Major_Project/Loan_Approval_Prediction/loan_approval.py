@@ -16,7 +16,7 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv('Loan_Approval_Prediction/loan_approval_dataset.csv')
+    df = pd.read_csv('Loan_Approval_Prediction\loan_approval_dataset.csv')
     df[' education'].replace([' Graduate', ' Not Graduate'], [1, 0], inplace=True)
     df[' self_employed'].replace([' No', ' Yes'], [0, 1], inplace=True)
     df[' loan_status'].replace([' Approved', ' Rejected'], [1, 0], inplace=True)
