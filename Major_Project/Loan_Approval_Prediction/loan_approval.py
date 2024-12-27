@@ -161,6 +161,7 @@ if submitted:
     )
 
     fig.update_traces(marker=dict(size=10, opacity=0.8))
+    st.plotly_chart(fig)
 
     
     st.markdown("""
