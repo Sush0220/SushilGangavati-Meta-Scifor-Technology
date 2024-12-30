@@ -51,6 +51,8 @@ df = generate_dataset()
 #Sidebar Charts
 st.sidebar.markdown("### 📊 Dataset Insights")
 loan_status_counts = df['loan_status'].value_counts()
+st.sidebar.write("Loan Status Counts: ")
+st.sidebar.write(loan_status_counts)
 loan_status_labels = ['Approved', 'Not Approved']
 
 pie_chart_data = pd.DataFrame({
@@ -142,7 +144,9 @@ model = train_model()
 input_data, submitted = user_input_features()
 
 if submitted:
-    prediction = model.predict(input_data)[0]
+    probabilities = model.predict_proba(input_data)[0]
+    prediction = 1 if probabilities[1] > 0.7 else 0
+    st.write(prediction)
     result = "✅ Approved" if prediction == 1 else "❌ Not Approved"
     st.markdown("### 🎯 Prediction Result")
     st.subheader(result)
